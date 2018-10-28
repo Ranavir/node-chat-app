@@ -18,9 +18,7 @@ socket.on('newMessage',function(message){
 
   $('#messages').append(html);
 });
-socket.on('disconnect', function(){
-  console.log('Disconnected from server');
-});
+
 
 socket.on('newLocationMessage',function(message){
   var formattedTime = moment(message.createdAt).format('h:mm a');
@@ -33,6 +31,9 @@ socket.on('newLocationMessage',function(message){
   $('#messages').append(html);
 });
 
+socket.on('disconnect', function(){
+  console.log('Disconnected from server');
+});
 
 $('#message-from').on('submit',function(e){
   e.preventDefault();
