@@ -26,15 +26,26 @@ io.on('connection',(socket) =>{
       return callback('Name and Room name are required.');
     }
 
-    socket.join(params.room);//user joins a Room
+    var pName = params.name.trim().toLowerCase();
+    var pRoom = params.room.trim().toLowerCase();
+
+    //validate unique usernames in this room
+    var isUniqueUserInRoom = users.getUserList(pRoom)
+                              .filter((name) => name.toLowerCase() === pName).length === 0;
+    // console.log(`Uniqueness in room :${isUniqueUnameToRoom}`);
+    if(!isUniqueUserInRoom){
+      return callback(`Please choose another Name. ${params.name} already exist in room ${pRoom}`);
+    }
+    // console.log(`Room joined :${pRoom}`);
+    socket.join(pRoom);//user joins a Room
     users.removeUser(socket.id);//remove the user from any other room
-    users.addUser(socket.id, params.name, params.room);//add user to the chat Room
+    users.addUser(socket.id, params.name, pRoom);//add user to the chat Room
 
     //emit event to clients in this room for updated user list
-    io.to(params.room).emit('updateUserList',users.getUserList(params.room));
+    io.to(pRoom).emit('updateUserList',users.getUserList(pRoom));
 
     socket.emit('newMessage',generateMessage('Admin', 'Welcome to the chat App'));
-    socket.broadcast.to(params.room).emit('newMessage',generateMessage('Admin', `${params.name} has joined.`));
+    socket.broadcast.to(pRoom).emit('newMessage',generateMessage('Admin', `${params.name} has joined.`));
 
     callback();
   });
